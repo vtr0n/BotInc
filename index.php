@@ -2,7 +2,7 @@
 
 include "MySQL.php";
 include "VkAPI.php";
-include "Search.php";
+include "SphinxSearch.php";
 include "Functions.php";
 include "Hooks.php";
 
@@ -10,8 +10,8 @@ $VK = new VkAPI;
 $SQL = new MySQL;
 
 $data = json_decode(file_get_contents('php://input'));
-$data = json_decode('{"type":"message_new","object":{"id":882844,"date":1491131033,"out":0,"user_id":1,"read_state":0,"title":" ... ","body":"😃😃😃"},"group_id":1,"secret":""}');
-$settings = $SQL->get_settings($data->group_id); // global
+//$data = json_decode('{"type":"message_new","object":{"id":882844,"date":1491131033,"out":0,"user_id":1,"read_state":0,"title":" ... ","body":"третья"},"group_id":1,"secret":""}');
+$settings = $SQL->get_settings($data->group_id);
 if(!$settings) {
     exit("ok"); // Если не нашли такого бота
 }
@@ -32,10 +32,11 @@ switch ($data->type) {
         foreach ($HOOKS->hooks_array as $value) { // подключаем хуки
             include_once $value;
         }
-        $SEARCH = new Search();
-        // Вносим в класс хуки
-        // Хуки. Выполняются до поиска. Можно делать всякие чатики анонимные, проверки на подписку, репосты
-        // Подумай насчет приоритетизации
+        $SEARCH = new SphinxSearch();
+
+        $answer = $SEARCH->search($data->group_id, $data->object->body);
+
+        //var_dump($answer);
         // Функции. Вызываются после поиска по базе
         exit("ok");
         break;
