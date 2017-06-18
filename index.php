@@ -26,6 +26,8 @@ switch ($data->type) {
 
     case 'message_new':
         //Записываем во входящее
+        $VK->access_token = $settings["access_token"];
+
         $SQL->insert_message_new($data->group_id, $data->object->user_id, $data->object->body, $data->object->date);
 
         $HOOKS = new Hooks($settings["hooks"]);
@@ -36,8 +38,8 @@ switch ($data->type) {
 
         $answer = $SEARCH->search($data->group_id, $data->object->body);
 
-        //var_dump($answer);
-        // Функции. Вызываются после поиска по базе
+        $VK->messages_send($data->object->user_id, "", $answer); // Отправляем сообщение
+
         exit("ok");
         break;
 

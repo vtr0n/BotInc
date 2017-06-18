@@ -8,19 +8,14 @@ class VkAPI
         $attachment_in,
         $attachment_out,
         $sleep;
-    public function account_ban_user($user_id)
-    {
-        return $this->request("account.banUser", array('user_id' => $user_id));
-    }
-    //------------------------------------------------------------------------------------------------------------------
-    // Account
-    //------------------------------------------------------------------------------------------------------------------
+
     protected function request($method, $params = array())
     {
         $url = 'https://api.vk.com/method/' . $method;
         $params['access_token'] = $this->access_token;
         $params['v'] = $this->version;
         @$resp = json_decode($this->curl($url . '?' . http_build_query($params)));
+
         if (($resp == NULL) or isset($resp->error)) {
             usleep($this->sleep);
             @$resp = json_decode($this->curl($url . '?' . http_build_query($params)));
@@ -32,8 +27,10 @@ class VkAPI
             //var_dump($resp);
             return false;
         }
+
         return $resp;
     }
+
     private function curl($url)
     {
         $ch = curl_init();
@@ -45,32 +42,49 @@ class VkAPI
         curl_close($ch);
         return $resp;
     }
-    public function account_getAppPermissions()
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Account
+    //------------------------------------------------------------------------------------------------------------------
+
+    public function account_ban_user($user_id)
     {
-        return $this->request("account.getAppPermissions");
+        return $this->request("account.banUser", array('user_id' => $user_id));
     }
-    //------------------------------------------------------------------------------------------------------------------
-    // Execute
-    //------------------------------------------------------------------------------------------------------------------
+
     public function account_setOnline()
     {
         return $this->request("account.setOnline", array());
     }
+
+    public function account_getAppPermissions()
+    {
+        return $this->request("account.getAppPermissions");
+    }
+
     //------------------------------------------------------------------------------------------------------------------
-    // Messages
+    // Execute
     //------------------------------------------------------------------------------------------------------------------
+
     public function execute($code)
     {
         return $this->request("execute", array('code' => $code));
     }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Messages
+    //------------------------------------------------------------------------------------------------------------------
+
     public function messages_get($count = 20, $offset = 0, $out = 0)
     {
-        return $this->request("messages.get", array('count' => $count, 'offset' => $offset, '$out' => $out));
+        return $this->request("messages.get", array('count' => $count, 'offset' => $offset, 'out' => $out));
     }
+
     public function messages_getById($message_ids)
     {
         return $this->request("messages.getById", array('message_ids' => $message_ids));
     }
+
     public function messages_getChat($chat_id, $fields = '', $name_case = '')
     {
         return $this->request("messages.getChat",
@@ -81,10 +95,12 @@ class VkAPI
             )
         );
     }
+
     public function messages_getDialogs($count = 10, $offset)
     {
         return $this->request("messages.getDialogs", array('count' => $count, 'offset' => $offset));
     }
+
     public function messages_getHistory($count = 20, $offset = 0, $rev = 0)
     {
         return $this->request("messages.getHistory",
@@ -95,38 +111,47 @@ class VkAPI
             )
         );
     }
+
     public function messages_markAsRead($message_ids)
     {
         return $this->request("messages.markAsRead", array('message_ids' => $message_ids));
     }
-    //------------------------------------------------------------------------------------------------------------------
-    // Friends
-    //------------------------------------------------------------------------------------------------------------------
+
     public function messages_send($user_id = '', $chat_id = '', $message = '', $attachment = '')
     {
         $params = array();
+
         if ($chat_id == '')
             $params['user_id'] = $user_id;
         else
-            $params['$chat_id'] = $chat_id;
-        $params['$message'] = $message;
-        $params['$attachment'] = $attachment;
+            $params['chat_id'] = $chat_id;
+
+        $params['message'] = $message;
+        $params['attachment'] = $attachment;
+
         return $this->request("messages.send", $params);
     }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Friends
+    //------------------------------------------------------------------------------------------------------------------
+
     public function friends_add($user_id, $text = "", $follow = 0)
     {
         return $this->request("friends.add",
             array(
                 'user_id' => $user_id,
-                '$text' => $text,
-                '$follow' => $follow
+                'text' => $text,
+                'follow' => $follow
             )
         );
     }
+
     public function friends_delete($user_id)
     {
         return $this->request("friends.delete", array('user_id' => $user_id));
     }
+
     public function friends_get($user_id = "", $list_id = "", $count = "", $fields = "")
     {
         return $this->request("friends.get",
@@ -138,13 +163,7 @@ class VkAPI
             )
         );
     }
-    //------------------------------------------------------------------------------------------------------------------
-    // Groups
-    //------------------------------------------------------------------------------------------------------------------
-    public function groups_getById($group_ids = "", $fields = "")
-    {
-        return $this->request("groups.getById", array('group_ids' => $group_ids, 'fields' => $fields));
-    }
+
     public function friends_getRequests($out, $count = 100, $sort = 0)
     {
         return $this->request("friends.getRequests",
@@ -155,18 +174,31 @@ class VkAPI
             )
         );
     }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Groups
+    //------------------------------------------------------------------------------------------------------------------
+
+    public function groups_getById($group_ids = "", $fields = "")
+    {
+        return $this->request("groups.getById", array('group_ids' => $group_ids, 'fields' => $fields));
+    }
+
     public function groups_getCallbackConfirmationCode($group_id)
     {
         return $this->request("groups.getCallbackConfirmationCode", array('group_id' => $group_id));
     }
+
     public function groups_getCallbackServerSettings($group_id)
     {
         return $this->request("groups.getCallbackServerSettings", array('group_id' => $group_id));
     }
+
     public function groups_getCallbackSettings($group_id)
     {
         return $this->request("groups.getCallbackSettings", array('group_id' => $group_id));
     }
+
     public function groups_setCallbackServer($group_id, $server_url = "")
     {
         return $this->request("groups.setCallbackServer",
@@ -176,6 +208,7 @@ class VkAPI
             )
         );
     }
+
     public function groups_setCallbackSettings(
         $group_id,
         $message_new = 0,
@@ -226,6 +259,7 @@ class VkAPI
             )
         );
     }
+
     public function groups_setCallbackServerSettings($group_id, $secret_key)
     {
         return $this->request("groups.setCallbackServerSettings",
@@ -235,13 +269,16 @@ class VkAPI
             )
         );
     }
+
     public function groups_isMember($group_id, $user_id)
     {
         return $this->request("groups.isMember", array('group_id' => $group_id, 'user_id' => $user_id));
     }
+
     //------------------------------------------------------------------------------------------------------------------
     // Users
     //------------------------------------------------------------------------------------------------------------------
+
     public function users_get($user_id, $fields = "", $name_case = "nom")
     {
         return $this->request("users.get",
