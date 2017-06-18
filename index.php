@@ -1,6 +1,5 @@
 <?php
 
-include "config.php";
 include "MySQL.php";
 include "VkAPI.php";
 include "Search.php";
@@ -11,25 +10,33 @@ $VK = new VkAPI;
 $SQL = new MySQL;
 
 $data = json_decode(file_get_contents('php://input'));
-//$data = json_decode('{"type":"group_leave","object":{"id":882844,"date":1491131033,"out":0,"user_id":1,"read_state":0,"title":" ... ","body":"😃😃😃"},"group_id":1,"secret":""}');
+$data = json_decode('{"type":"message_new","object":{"id":882844,"date":1491131033,"out":0,"user_id":1,"read_state":0,"title":" ... ","body":"😃😃😃"},"group_id":1,"secret":""}');
+$settings = $SQL->get_settings($data->group_id); // global
+if(!$settings) {
+    exit("ok"); // Если не нашли такого бота
+}
 
 switch ($data->type) {
 
     case 'confirmation':
-        $code = $SQL->get_confirmation_code($data->group_id);
+        $code = $settings["confirmation_code"];
         exit($code);
 
         break;
 
     case 'message_new':
-        //Записываем в входящее
+        //Записываем во входящее
         $SQL->insert_message_new($data->group_id, $data->object->user_id, $data->object->body, $data->object->date);
 
+        $HOOKS = new Hooks($settings["hooks"]);
+        foreach ($HOOKS->hooks_array as $value) { // подключаем хуки
+            include_once $value;
+        }
+        $SEARCH = new Search();
         // Вносим в класс хуки
         // Хуки. Выполняются до поиска. Можно делать всякие чатики анонимные, проверки на подписку, репосты
         // Подумай насчет приоритетизации
         // Функции. Вызываются после поиска по базе
-
         exit("ok");
         break;
 

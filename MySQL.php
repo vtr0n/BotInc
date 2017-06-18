@@ -23,15 +23,15 @@ class MySQL
         return mysqli_query($this->link, $this->prepareQuery(func_get_args()));
     }
 
-    public function get_confirmation_code($group_id)
+    public function get_settings($group_id)
     {
-        $resp = $this->query("SELECT confirmation_code FROM settings WHERE group_id = ?s", $group_id);
+        $resp = $this->query("SELECT * FROM settings WHERE group_id = ?s", $group_id);
         $resp = mysqli_fetch_assoc($resp);
 
         if (!$resp) {
-            return "";
+            return false;
         } else {
-            return $resp["confirmation_code"];
+            return $resp;
         }
 
     }
