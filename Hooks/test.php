@@ -6,5 +6,4 @@
  * Time: 1:48
  */
 
-echo "test.php";
-//var_dump($settings);
+//echo "test.php";
