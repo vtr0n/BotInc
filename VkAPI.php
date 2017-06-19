@@ -7,7 +7,7 @@ class VkAPI
         $version = 5.64,
         $attachment_in,
         $attachment_out,
-        $sleep;
+        $sleep = 350000;
 
     protected function request($method, $params = array())
     {
@@ -19,19 +19,21 @@ class VkAPI
         if (($resp == NULL) or isset($resp->error)) {
             usleep($this->sleep);
             @$resp = json_decode($this->curl($url . '?' . http_build_query($params)));
-        }
-        if (($resp == NULL) or isset($resp->error)) {
-            usleep($this->sleep);
-            @$resp = json_decode($this->curl($url . '?' . http_build_query($params)));
-        } else {
-            //var_dump($resp);
-            return false;
-        }
 
+            if (($resp == NULL) or isset($resp->error)) {
+                usleep($this->sleep);
+                @$resp = json_decode($this->curl($url . '?' . http_build_query($params)));
+            }
+
+            if (($resp == NULL) or isset($resp->error)) {
+                return false;
+            }
+        }
+        //print_r($params);
         return $resp;
     }
 
-    private function curl($url)
+    protected function curl($url)
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);

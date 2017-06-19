@@ -63,6 +63,31 @@ class MySQL
         $this->query("INSERT INTO group_leave(group_id, vk_id, date) VALUES(?s, ?s, ?s)", $group_id, $user_id, $date);
     }
 
+    /** Подписчики ***/
+    public function is_subscriber($group_id, $vk_id)
+    {
+        $resp = $this->query("SELECT * FROM subscribers WHERE vk_id = ?s AND group_id = ?s LIMIT 1",
+            $vk_id,
+            $group_id
+        );
+
+        $resp = @mysqli_fetch_assoc($resp);
+        if (!$resp) {
+            return false;
+        }
+        return true;
+    }
+
+    public function add_subscriber($group_id, $user_id)
+    {
+        $this->query("INSERT INTO subscribers(group_id, vk_id) VALUES(?s, ?s);", $group_id, $user_id);
+    }
+
+    public function delete_subscriber($group_id, $user_id)
+    {
+        $this->query("DELETE FROM subscribers WHERE vk_id = ?s AND group_id = ?s;", $user_id, $group_id);
+    }
+
     /** Методы защиты ***/
     private function prepareQuery($args)
     {
