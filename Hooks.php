@@ -18,7 +18,7 @@ class Hooks
 
         $return_arr = array();
         for($i = 0; $i < count($hooks); $i++) {
-            if(in_array($hooks[$i], $valid_hooks)) {
+            if(in_array($hooks[$i] . ".php", $valid_hooks)) {
                 array_push($return_arr, __DIR__ . "/Hooks/" . $hooks[$i]);
             }
         }

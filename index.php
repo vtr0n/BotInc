@@ -10,7 +10,7 @@ $VK = new VkAPI;
 $SQL = new MySQL;
 
 $data = json_decode(file_get_contents('php://input'));
-//$data = json_decode('{"type":"message_new","object":{"id":882844,"date":1491131033,"out":0,"user_id":1,"read_state":0,"title":" ... ","body":"третья"},"group_id":1,"secret":""}');
+$data = json_decode('{"type":"message_new","object":{"id":882844,"date":1491131033,"out":0,"user_id":1,"read_state":0,"title":" ... ","body":"третья"},"group_id":1,"secret":""}');
 $settings = $SQL->get_settings($data->group_id);
 if(!$settings) {
     exit("ok"); // Если не нашли такого бота
@@ -32,7 +32,7 @@ switch ($data->type) {
 
         $HOOKS = new Hooks($settings["hooks"]);
         foreach ($HOOKS->hooks_array as $value) { // подключаем хуки
-            include_once $value;
+            include_once $value . ".php";
         }
         $SEARCH = new SphinxSearch();
 
@@ -41,7 +41,6 @@ switch ($data->type) {
         $FUNC = new Functions($settings["functions"]);
         // Проверяем функция ли это и есть ли такой файл
         if($func_name = $FUNC->is_function($answer) and $path_name = $FUNC->is_set($func_name)) {
-            echo 123;
             include __DIR__ . "/Functions/$path_name.php";
             $func = new $path_name;
             $resp = $func->go();
