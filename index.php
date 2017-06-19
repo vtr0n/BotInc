@@ -38,7 +38,27 @@ switch ($data->type) {
 
         $answer = $SEARCH->search($data->group_id, $data->object->body);
 
-        $VK->messages_send($data->object->user_id, "", $answer); // Отправляем сообщение
+        $FUNC = new Functions($settings["functions"]);
+        // Проверяем функция ли это и есть ли такой файл
+        if($func_name = $FUNC->is_function($answer) and $path_name = $FUNC->is_set($func_name)) {
+            echo 123;
+            include __DIR__ . "/Functions/$path_name.php";
+            $func = new $path_name;
+            $resp = $func->go();
+            if(!$resp) {
+                $VK->messages_send(
+                    $data->object->user_id,
+                    "",
+                    $SEARCH->randomize($SEARCH->get_unfounded($data->group_id))
+                ); // Отправляем сообщение
+            }
+        } else {
+            $VK->messages_send(
+                $data->object->user_id,
+                "",
+                $SEARCH->randomize($SEARCH->get_unfounded($data->group_id))
+            ); // Отправляем сообщение
+        }
 
         exit("ok");
         break;
