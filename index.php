@@ -13,7 +13,7 @@ $SQL = new MySQL;
 $data = json_decode(file_get_contents('php://input'));
 
 $settings = $SQL->get_settings($data->group_id);
-if(!$settings) {
+if(!$settings or (!empty($data->secret) and $settings["uniqid"] != $data->secret)) {
     exit("ok"); // Если не нашли такого бота
 }
 
