@@ -8,8 +8,8 @@
  */
 class MyVkAPI extends VkAPI
 {
-   // public
-    //    $service_token; // Нужен в некоторых методах
+    public
+        $service_token; // Нужен в некоторых методах
 
     public function is_subscriber($group_id, $user_id)
     {

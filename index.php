@@ -33,7 +33,7 @@ switch ($data->type) {
         //Записываем во входящее
         $SQL->insert_message_new($data->group_id, $data->object->user_id, $data->object->body, $data->object->date);
 
-        $HOOKS = new Hooks($settings["hooks"]);
+        $HOOKS = new Hooks($settings["hooks"], "Hooks_message_new");
         foreach ($HOOKS->hooks_array as $value) { // подключаем хуки
             include_once $value . ".php";
         }
@@ -70,17 +70,24 @@ switch ($data->type) {
         break;
 
     case 'group_join':
-        // Надо тоже организовать хуки
-        $SQL->add_subscriber($data->group_id, $data->object->user_id);
         $SQL->insert_group_join($data->group_id, $data->object->user_id, strtotime("now"));
+
+        // В принципе можно из бд цеплять разные данные, а не общие хуки
+        $HOOKS = new Hooks($settings["hooks"], "Hooks_group_join");
+        foreach ($HOOKS->hooks_array as $value) { // подключаем хуки
+            include_once $value . ".php";
+        }
 
         exit("ok");
         break;
 
     case 'group_leave':
-        // Надо тоже организовать хуки
-        $SQL->delete_subscriber($data->group_id, $data->object->user_id);
         $SQL->insert_group_leave($data->group_id, $data->object->user_id, strtotime("now"));
+
+        $HOOKS = new Hooks($settings["hooks"], "Hooks_group_leave");
+        foreach ($HOOKS->hooks_array as $value) { // подключаем хуки
+            include_once $value . ".php";
+        }
 
         exit("ok");
         break;
