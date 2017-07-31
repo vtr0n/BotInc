@@ -12,11 +12,10 @@ class SphinxSearch
     {
         include_once(__DIR__ . "/config.php");
         $this->link = mysqli_connect(
-            config\SPHINX_HOST,
-            config\SPHINX_USERNAME,
-            config\SPHINX_PASSWORD,
-            config\SPHINX_DB,
-            config\SPHINX_PORT
+            config\MYSQL_HOST,
+            config\MYSQL_USERNAME,
+            config\MYSQL_PASSWORD,
+            config\MYSQL_DB
         );
         mysqli_set_charset($this->link, "utf8mb4");
     }
@@ -29,7 +28,8 @@ class SphinxSearch
 
     public function search($group_id, $message)
     {
-        $resp = $this->query("SELECT * FROM VkChatBot WHERE group_id = ?i AND MATCH(?s) LIMIT 1", $group_id, $message);
+        $resp = $this->query("SELECT * FROM answers WHERE group_id = ?i AND MATCH (output) AGAINST (?s) LIMIT 1",
+            $group_id, $message);
         $resp = mysqli_fetch_assoc($resp);
 
         if ($resp) {
@@ -41,7 +41,7 @@ class SphinxSearch
 
     public function get_unfounded($group_id) // 1 сообщение в базе - общие
     {
-        $resp = $this->query("SELECT output FROM VkChatBot WHERE group_id = ?i AND id = 1", $group_id);
+        $resp = $this->query("SELECT output FROM answers WHERE group_id = ?i AND id = 1", $group_id);
         $resp = mysqli_fetch_assoc($resp);
 
         if ($resp) {
