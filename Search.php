@@ -6,17 +6,17 @@
  * Date: 16.06.17
  * Time: 23:34
  */
-class SphinxSearch
+class Search
 {
 	function __construct($config = NULL)
 	{
 		include_once(__DIR__ . "/config.php");
 		$this->link = mysqli_connect(
-			config\SPHINX_HOST,
-			config\SPHINX_USERNAME,
-			config\SPHINX_PASSWORD,
-			config\SPHINX_DB,
-			config\SPHINX_PORT
+			config\SEARCH_DB_HOST,
+			config\SEARCH_DB_USERNAME,
+			config\SEARCH_DB_PASSWORD,
+			config\SEARCH_DB_DB,
+			config\SEARCH_DB_PORT
 		);
 
 		mysqli_set_charset($this->link, "utf8mb4");

@@ -11,7 +11,8 @@ class MySQL
 			config\MYSQL_HOST,
 			config\MYSQL_USERNAME,
 			config\MYSQL_PASSWORD,
-			config\MYSQL_DB
+			config\MYSQL_DB,
+			config\MYSQL_PORT
 		);
 		mysqli_set_charset($this->link, "utf8mb4");
 	}

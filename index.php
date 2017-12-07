@@ -3,16 +3,16 @@
 include "MySQL.php";
 include "VkAPI.php";
 include "MyVkAPI.php";
-include "SphinxSearch.php";
+include "Search.php";
 include "Functions.php";
 include "Hooks.php";
 
-$VK = new MyVkAPI;
-$SQL = new MySQL;
+$Vk = new MyVkAPI;
+$Sql = new MySQL;
 
 $data = json_decode(file_get_contents('php://input'));
 
-$settings = $SQL->get_settings($data->group_id);
+$settings = $Sql->get_settings($data->group_id);
 if (!$settings or (!empty($data->secret) and $settings["uniqid"] != $data->secret)) {
 	exit("ok"); // Если не нашли такого бота
 }
@@ -27,39 +27,39 @@ switch ($data->type) {
 
 	case 'message_new':
 		// Устанавиваем ключи
-		$VK->access_token = $settings["access_token"];
-		$VK->service_token = $settings["service_token"];
+		$Vk->access_token = $settings["access_token"];
+		$Vk->service_token = $settings["service_token"];
 
 		//Записываем во входящее
-		$SQL->insert_message_new($data->group_id, $data->object->user_id, $data->object->body, $data->object->date);
+		$Sql->insert_message_new($data->group_id, $data->object->user_id, $data->object->body, $data->object->date);
 
-		$HOOKS = new Hooks($settings["hooks"], "Hooks_message_new");
-		foreach ($HOOKS->hooks_array as $value) { // подключаем хуки
+		$Hooks = new Hooks($settings["hooks"], "Hooks_message_new");
+		foreach ($Hooks->hooks_array as $value) { // подключаем хуки
 			include_once $value . ".php";
 		}
-		$SEARCH = new SphinxSearch();
+		$Search = new Search();
 
-		$answer = $SEARCH->search($data->group_id, $data->object->body);
+		$answer = $Search->search($data->group_id, $data->object->body);
 
-		$FUNC = new Functions($settings["functions"]);
+		$Func = new Functions($settings["functions"]);
 		// Проверяем функция ли это и есть ли такой файл
-		if ($func_name = $FUNC->is_function($answer)) {
-			if ($path_name = $FUNC->is_set($func_name)) {
+		if ($func_name = $Func->is_function($answer)) {
+			if ($path_name = $Func->is_set($func_name)) {
 				include __DIR__ . "/Functions/$path_name.php";
 				$func = new $path_name;
 				$resp = $func->go();
 				if (!$resp) {
-					$VK->messages_send(
-						$data->object->user_id, "", $SEARCH->randomize($SEARCH->get_unfounded($data->group_id)));
+					$Vk->messages_send(
+						$data->object->user_id, "", $Search->randomize($Search->get_unfounded($data->group_id)));
 				}
 			}
 			else {
-				$VK->messages_send(
-					$data->object->user_id, "", $SEARCH->randomize($SEARCH->get_unfounded($data->group_id)));
+				$Vk->messages_send(
+					$data->object->user_id, "", $Search->randomize($Search->get_unfounded($data->group_id)));
 			}
 		}
 		else {
-			$VK->messages_send($data->object->user_id, "", $answer);
+			$Vk->messages_send($data->object->user_id, "", $answer);
 		}
 
 		exit("ok");
@@ -67,11 +67,11 @@ switch ($data->type) {
 		break;
 
 	case 'group_join':
-		$SQL->insert_group_join($data->group_id, $data->object->user_id, strtotime("now"));
+		$Sql->insert_group_join($data->group_id, $data->object->user_id, strtotime("now"));
 
 		// В принципе можно из бд цеплять разные данные, а не общие хуки
-		$HOOKS = new Hooks($settings["hooks"], "Hooks_group_join");
-		foreach ($HOOKS->hooks_array as $value) { // подключаем хуки
+		$Hooks = new Hooks($settings["hooks"], "Hooks_group_join");
+		foreach ($Hooks->hooks_array as $value) { // подключаем хуки
 			include_once $value . ".php";
 		}
 
@@ -79,10 +79,10 @@ switch ($data->type) {
 		break;
 
 	case 'group_leave':
-		$SQL->insert_group_leave($data->group_id, $data->object->user_id, strtotime("now"));
+		$Sql->insert_group_leave($data->group_id, $data->object->user_id, strtotime("now"));
 
-		$HOOKS = new Hooks($settings["hooks"], "Hooks_group_leave");
-		foreach ($HOOKS->hooks_array as $value) { // подключаем хуки
+		$Hooks = new Hooks($settings["hooks"], "Hooks_group_leave");
+		foreach ($Hooks->hooks_array as $value) { // подключаем хуки
 			include_once $value . ".php";
 		}
 
@@ -90,9 +90,14 @@ switch ($data->type) {
 		break;
 
 	case 'wall_repost':
-		$SQL->add_repost(
+		$Sql->add_repost(
 			$data->group_id, $data->object->copy_history[0]->id, $data->object->copy_history[0]->owner_id,
 			$data->object->from_id);
+
+		$Hooks = new Hooks($settings["hooks"], "Hooks_wall_repost");
+		foreach ($Hooks->hooks_array as $value) { // подключаем хуки
+			include_once $value . ".php";
+		}
 
 		exit("ok");
 		break;
