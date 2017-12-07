@@ -8,18 +8,19 @@
  */
 class MyVkAPI extends VkAPI
 {
-    public
-        $service_token; // Нужен в некоторых методах
+	public $service_token; // Нужен в некоторых методах
 
-    public function is_subscriber($group_id, $user_id)
-    {
-        $resp = $this->groups_isMember($group_id, $user_id);
-        if(!isset($resp->response)) {
-            return false;
-        } elseif ($resp->response == 1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+	public function is_subscriber($group_id, $user_id)
+	{
+		$resp = $this->groups_isMember($group_id, $user_id);
+		if (!isset($resp->response)) {
+			return false;
+		}
+		elseif ($resp->response == 1) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 }

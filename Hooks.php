@@ -8,21 +8,20 @@
  */
 class Hooks
 {
-    public
-        $hooks_array;
+	public $hooks_array;
 
-    function __construct($hooks, $folder)
-    {
-        $hooks = explode(";", $hooks);
-        $valid_hooks = scandir( __DIR__ . "/$folder");
+	function __construct($hooks, $folder)
+	{
+		$hooks = explode(";", $hooks);
+		$valid_hooks = scandir(__DIR__ . "/$folder");
 
-        $return_arr = array();
-        for($i = 0; $i < count($hooks); $i++) {
-            if(in_array($hooks[$i] . ".php", $valid_hooks)) {
-                array_push($return_arr, __DIR__ . "/$folder/" . $hooks[$i]);
-            }
-        }
+		$return_arr = array();
+		for ($i = 0; $i < count($hooks); $i++) {
+			if (in_array($hooks[$i] . ".php", $valid_hooks)) {
+				array_push($return_arr, __DIR__ . "/$folder/" . $hooks[$i]);
+			}
+		}
 
-        $this->hooks_array = $return_arr;
-    }
+		$this->hooks_array = $return_arr;
+	}
 }

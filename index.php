@@ -13,97 +13,91 @@ $SQL = new MySQL;
 $data = json_decode(file_get_contents('php://input'));
 
 $settings = $SQL->get_settings($data->group_id);
-if(!$settings or (!empty($data->secret) and $settings["uniqid"] != $data->secret)) {
-    exit("ok"); // Если не нашли такого бота
+if (!$settings or (!empty($data->secret) and $settings["uniqid"] != $data->secret)) {
+	exit("ok"); // Если не нашли такого бота
 }
 
 switch ($data->type) {
 
-    case 'confirmation':
-        $code = $settings["confirmation_code"];
-        exit($code);
+	case 'confirmation':
+		$code = $settings["confirmation_code"];
+		exit($code);
 
-        break;
+		break;
 
-    case 'message_new':
-        // Устанавиваем ключи
-        $VK->access_token = $settings["access_token"];
-        $VK->service_token = $settings["service_token"];
+	case 'message_new':
+		// Устанавиваем ключи
+		$VK->access_token = $settings["access_token"];
+		$VK->service_token = $settings["service_token"];
 
-        //Записываем во входящее
-        $SQL->insert_message_new($data->group_id, $data->object->user_id, $data->object->body, $data->object->date);
+		//Записываем во входящее
+		$SQL->insert_message_new($data->group_id, $data->object->user_id, $data->object->body, $data->object->date);
 
-        $HOOKS = new Hooks($settings["hooks"], "Hooks_message_new");
-        foreach ($HOOKS->hooks_array as $value) { // подключаем хуки
-            include_once $value . ".php";
-        }
-        $SEARCH = new SphinxSearch();
+		$HOOKS = new Hooks($settings["hooks"], "Hooks_message_new");
+		foreach ($HOOKS->hooks_array as $value) { // подключаем хуки
+			include_once $value . ".php";
+		}
+		$SEARCH = new SphinxSearch();
 
-        $answer = $SEARCH->search($data->group_id, $data->object->body);
+		$answer = $SEARCH->search($data->group_id, $data->object->body);
 
-        $FUNC = new Functions($settings["functions"]);
-        // Проверяем функция ли это и есть ли такой файл
-        if($func_name = $FUNC->is_function($answer)) {
-            if($path_name = $FUNC->is_set($func_name)) {
-                include __DIR__ . "/Functions/$path_name.php";
-                $func = new $path_name;
-                $resp = $func->go();
-                if(!$resp) {
-                    $VK->messages_send(
-                        $data->object->user_id,
-                        "",
-                        $SEARCH->randomize($SEARCH->get_unfounded($data->group_id))
-                    );
-                }
-            } else {
-                $VK->messages_send(
-                    $data->object->user_id,
-                    "",
-                    $SEARCH->randomize($SEARCH->get_unfounded($data->group_id))
-                );
-            }
-        } else {
-            $VK->messages_send($data->object->user_id, "", $answer);
-        }
+		$FUNC = new Functions($settings["functions"]);
+		// Проверяем функция ли это и есть ли такой файл
+		if ($func_name = $FUNC->is_function($answer)) {
+			if ($path_name = $FUNC->is_set($func_name)) {
+				include __DIR__ . "/Functions/$path_name.php";
+				$func = new $path_name;
+				$resp = $func->go();
+				if (!$resp) {
+					$VK->messages_send(
+						$data->object->user_id, "", $SEARCH->randomize($SEARCH->get_unfounded($data->group_id)));
+				}
+			}
+			else {
+				$VK->messages_send(
+					$data->object->user_id, "", $SEARCH->randomize($SEARCH->get_unfounded($data->group_id)));
+			}
+		}
+		else {
+			$VK->messages_send($data->object->user_id, "", $answer);
+		}
 
-        exit("ok");
-        break;
+		exit("ok");
 
-    case 'group_join':
-        $SQL->insert_group_join($data->group_id, $data->object->user_id, strtotime("now"));
+		break;
 
-        // В принципе можно из бд цеплять разные данные, а не общие хуки
-        $HOOKS = new Hooks($settings["hooks"], "Hooks_group_join");
-        foreach ($HOOKS->hooks_array as $value) { // подключаем хуки
-            include_once $value . ".php";
-        }
+	case 'group_join':
+		$SQL->insert_group_join($data->group_id, $data->object->user_id, strtotime("now"));
 
-        exit("ok");
-        break;
+		// В принципе можно из бд цеплять разные данные, а не общие хуки
+		$HOOKS = new Hooks($settings["hooks"], "Hooks_group_join");
+		foreach ($HOOKS->hooks_array as $value) { // подключаем хуки
+			include_once $value . ".php";
+		}
 
-    case 'group_leave':
-        $SQL->insert_group_leave($data->group_id, $data->object->user_id, strtotime("now"));
+		exit("ok");
+		break;
 
-        $HOOKS = new Hooks($settings["hooks"], "Hooks_group_leave");
-        foreach ($HOOKS->hooks_array as $value) { // подключаем хуки
-            include_once $value . ".php";
-        }
+	case 'group_leave':
+		$SQL->insert_group_leave($data->group_id, $data->object->user_id, strtotime("now"));
 
-        exit("ok");
-        break;
+		$HOOKS = new Hooks($settings["hooks"], "Hooks_group_leave");
+		foreach ($HOOKS->hooks_array as $value) { // подключаем хуки
+			include_once $value . ".php";
+		}
 
-    case 'wall_repost':
-        $SQL->add_repost(
-            $data->group_id,
-            $data->object->copy_history[0]->id,
-            $data->object->copy_history[0]->owner_id,
-            $data->object->from_id
-        );
+		exit("ok");
+		break;
 
-        exit("ok");
-        break;
+	case 'wall_repost':
+		$SQL->add_repost(
+			$data->group_id, $data->object->copy_history[0]->id, $data->object->copy_history[0]->owner_id,
+			$data->object->from_id);
 
-    default:
-        exit("ok");
-        break;
+		exit("ok");
+		break;
+
+	default:
+		exit("ok");
+		break;
 }
