@@ -19,11 +19,12 @@ const MYSQL_PORT = 3306;
  * Для уменьшения нагрузки репомендуется использовать Sphinx
  * Конфиги лежат в /install/sphinx.conf
  * По умолчанию используется sphinx
- * Если нет возможности его поставить, просто скопируйте конфиги MySQL в нижние строки.
+ * Если нет возможности его поставить, просто скопируйте конфиги MySQL в нижние строки и поставьте SEARCH_IS_SPHINX = 0
  * Важно! При использовании Mysql как двигла для поиска, поставьте полнотекстовый индекс:
- * ALTER TABLE `answers` ADD FULLTEXT(`output`);
+ * ALTER TABLE `answers` ADD FULLTEXT(`input`);
  */
 
+const SEARCH_IS_SPHINX = 1;
 const SEARCH_DB_HOST = "127.0.0.1";
 const SEARCH_DB_USERNAME = "";
 const SEARCH_DB_PASSWORD = "";

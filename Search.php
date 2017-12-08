@@ -5,12 +5,20 @@
  * User: bad-day
  * Date: 16.06.17
  * Time: 23:34
+ * Класс для работы с поисковой базой данных
  */
 class Search
 {
+	var $is_sphinx = 0;
+
 	function __construct($config = NULL)
 	{
 		include_once(__DIR__ . "/config.php");
+
+		if (config\SEARCH_IS_SPHINX) {
+			$this->is_sphinx = 1;
+		}
+
 		$this->link = mysqli_connect(
 			config\SEARCH_DB_HOST,
 			config\SEARCH_DB_USERNAME,
@@ -24,7 +32,29 @@ class Search
 
 	public function search($group_id, $message)
 	{
-		$resp = $this->query("SELECT * FROM VkChatBot WHERE group_id = ?i AND MATCH(?s) LIMIT 1", $group_id, $message);
+		if ($this->is_sphinx) {
+			$resp = $this->query(
+				"SELECT * FROM VkChatBot WHERE group_id = ?i AND MATCH(?s) LIMIT 1",
+				$group_id,
+				$message
+			);
+		}
+		else {
+			if (iconv_strlen($message) < 3) {
+				$resp = $this->query(
+					"SELECT * FROM answers WHERE group_id = ?i input = ?s LIMIT 1",
+					$group_id,
+					$message
+				);
+			}
+			else {
+				$resp = $this->query(
+					"SELECT * FROM answers WHERE group_id = ?i AND MATCH(input) AGAINST(?s) LIMIT 1",
+					$group_id,
+					$message
+				);
+			}
+		}
 		$resp = mysqli_fetch_assoc($resp);
 
 		if ($resp) {
@@ -107,16 +137,30 @@ class Search
 		return $rand_str;
 	}
 
-	public function get_unfounded($group_id) // 1 сообщение в базе - общие
+
+	/**
+	 * Если прямым запросом к поисковой бд вернулся null, то запрос перепавляется сюда
+	 * В этом методе мы делаем запрос на полученя первой строкой, добавленной в базу
+	 * Логика движка такова, что если мы не нашли точного соответствия, мы выбираем первую строку
+	 * Если не нужно отвечать первым сообщением, то надо просто оставить пустую строку
+	 * @param $group_id
+	 * @return string
+	 */
+	public function get_unfounded($group_id)
 	{
-		$resp = $this->query("SELECT output FROM VkChatBot WHERE group_id = ?i AND id = 1", $group_id);
+		if ($this->is_sphinx) {
+			$resp = $this->query("SELECT output FROM VkChatBot WHERE group_id = ?i ORDER by id LIMIT 1", $group_id);
+		}
+		else {
+			$resp = $this->query("SELECT output FROM answers WHERE group_id = ?i ORDER by id LIMIT 1", $group_id);
+		}
 		$resp = mysqli_fetch_assoc($resp);
 
 		if ($resp) {
 			return $resp["output"];
 		}
 		else {
-			return "not founded";
+			return "not founded, please, contact to admin";
 		}
 	}
 }
