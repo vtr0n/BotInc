@@ -1,32 +1,24 @@
 <?php
 
-namespace config;
-
 //include_once "my_config.php";
 
-/*
- * Вместо чистого MySQL можно использовать его форки
- * Без ошибок работет Percona server и MariaDB
- */
-
+namespace config;
 const MYSQL_HOST = "127.0.0.1";
 const MYSQL_USERNAME = "";
 const MYSQL_PASSWORD = "";
-const MYSQL_DB = "VkChatBot";
+const MYSQL_DB = "";
 const MYSQL_PORT = 3306;
 
+const INDEX_PAGE = "http://botinc"; // Страничка для авторизиции
+const DASHBOARD_PAGE = "http://dashboard.botinc"; // страничка просмотра статистики
+
+const VK_ADMIN_ID = 344592979; // id странички администратора
+
 /*
- * Для уменьшения нагрузки репомендуется использовать Sphinx
- * Конфиги лежат в /install/sphinx.conf
- * По умолчанию используется sphinx
- * Если нет возможности его поставить, просто скопируйте конфиги MySQL в нижние строки и поставьте SEARCH_IS_SPHINX = 0
- * Важно! При использовании Mysql как двигла для поиска, поставьте полнотекстовый индекс:
- * ALTER TABLE `answers` ADD FULLTEXT(`input`);
+ * Создаем приложение(Веб-сайт)
+ * https://vk.com/apps?act=manage
+ * В настройках находим id и защищенный ключ
  */
 
-const SEARCH_IS_SPHINX = 1;
-const SEARCH_DB_HOST = "127.0.0.1";
-const SEARCH_DB_USERNAME = "";
-const SEARCH_DB_PASSWORD = "";
-const SEARCH_DB_DB = "VkChatBot";
-const SEARCH_DB_PORT = 9306;
+const VK_CLIENT_ID = "";
+const VK_CLIENT_SECRET = "";
