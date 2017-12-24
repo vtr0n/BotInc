@@ -23,12 +23,6 @@ class MySQL
 		return mysqli_fetch_assoc($resp);
 	}
 
-	public function get_user_info_null($vk_id)
-	{
-		$resp = $this->query("SELECT * FROM users WHERE vk_id = ?s AND group_id IS NULL", $vk_id);
-		return mysqli_fetch_assoc($resp);
-	}
-
 	public function query()
 	{
 		//var_dump($this->prepareQuery(func_get_args()));
@@ -85,6 +79,12 @@ class MySQL
 		}
 
 		return "'" . mysqli_real_escape_string($this->link, $value) . "'";
+	}
+
+	public function get_user_info_null($vk_id)
+	{
+		$resp = $this->query("SELECT * FROM users WHERE vk_id = ?s AND group_id IS NULL", $vk_id);
+		return mysqli_fetch_assoc($resp);
 	}
 
 	public function get_user_info_by_vk_id($vk_id)
@@ -247,6 +247,19 @@ class MySQL
 			);
 		else
 			$this->query("UPDATE user_db SET output = ?s WHERE id = ?s", $test["output"] . ";" . $output, $test["id"]);
+	}
+
+	public function db_multi_upload($vk_id, $group_id, $arr) // Для загрузки из файла
+	{
+		for ($i = 0; $i < count($arr); $i++) {
+			$this->query(
+				"INSERT INTO user_db(vk_id, group_id, input, output) VALUES(?i, ?i, ?s, ?s);",
+				$vk_id,
+				$group_id,
+				$arr[$i][1],
+				$arr[$i][2]
+			);
+		}
 	}
 
 	public function db_upload_special($vk_id, $group_id, $input, $output) // для подписок/отписок и прочего
