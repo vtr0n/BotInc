@@ -42,7 +42,6 @@ function message_local_limits()
 			$limit["limit_time"]
 		);
 
-		$Vk->messages_send($data->object->user_id, "", $output);
 		if ($user_count_messages > $limit["limit_count"]) {
 
 			$Vk->messages_send($data->object->user_id, "", $limit["limit_text"]);

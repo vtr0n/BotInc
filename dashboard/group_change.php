@@ -84,31 +84,41 @@ $user_groups = $SQL->get_user_groups($_SESSION['vk_uid']);
                         </div>
                         <div class="x_content">
 
+                            <table  class="table">
+                                <tbody id="TableData">
 							<?php
 							if ($user_groups) {
 
 								// description
 								for ($i = 0; $i < count($user_groups); $i++) {
+									echo '<tr>';
 									$VK->access_token = $user_groups[$i]["access_token"];
 									$description = $VK->groups_getById("", "description");
 
+									echo '<td style="width:100%;">';
 									echo '<form action="scripts/group_change/group_change.php" method="POST">';
 
-									echo "<a href='https://vk.com/" . $description->response[0]->screen_name . "'>" .
+									echo "<a target=\"_blank\" href='https://vk.com/" . $description->response[0]->screen_name . "'>" .
 										 $description->response[0]->name . "</a> &nbsp;";
 
+									echo '</td>';
+
 									$group_id = $description->response[0]->id;
-									echo "<input type=\"hidden\" value=\"$group_id\" name=\"group_id\" />";
-									echo "<button type=\"submit\" name=\"change\" class=\"btn-success\" > Выбрать</button>&nbsp;";
-									echo "<button type=\"submit\" name=\"delete\" class=\"btn-danger\" > Удалить</button><br>";
+									echo "<td><input type=\"hidden\" value=\"$group_id\" name=\"group_id\" /> </td>";
+									echo "<td><button type=\"submit\" name=\"change\" class=\"btn-success\" > Выбрать</button></td>";
+									echo "<td><button type=\"submit\" name=\"delete\" class=\"btn-danger\" > Удалить</button><br></td>";
+
 
 									echo '</form>';
+									echo '</tr>';
 								}
 							}
 							else {
 								echo "Вы еще не подключили сообщества";
 							}
 							?>
+                                </tbody>
+                            </table>
                             <br>
                             <small><a href="bot_connect.php">Добавить сообщество<a/></small>
                         </div>
