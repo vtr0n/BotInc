@@ -16,10 +16,6 @@
 /callback/Hooks_message_new/Big_db.php
 /callback/Hooks_message_new/Big_db_search_class.php
 
-# Вк запретил рассылку
-/dashboard/message_sending.php
-/dashboard/scripts/message_sending/*
-
 #Стимбот
 /callback/Hooks_wall_repost/SteamBot.php
 /callback/Hooks_wall_repost/SBscript/*
