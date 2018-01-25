@@ -56,7 +56,7 @@ CREATE TABLE `users` (
   `id`                INT(11)      NOT NULL,
   `vk_id`             INT(11)      NOT NULL,
   `group_id`          INT(11)      NOT NULL,
-  `work`              INT(11) DEFAULT 0,
+  `work`              INT(11) DEFAULT 1,
   `registration_date` DATETIME     NOT NULL,
   `access_token`      VARCHAR(255) NOT NULL,
   `service_token`     VARCHAR(255) NOT NULL,
